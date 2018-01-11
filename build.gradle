@@ -41,3 +41,7 @@ dependencies {
 	testCompile('org.springframework.restdocs:spring-restdocs-mockmvc')
     testCompile('org.spockframework:spock-spring')
 }
+
+bootRun {
+    jvmArgs = ['-Xdebug', '-Xrunjdwp:server=y,transport=dt_socket,port=5005,suspend=n']
+}

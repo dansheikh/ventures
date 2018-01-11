@@ -28,3 +28,15 @@ Once the repository has been cloned to a desired destination, the application an
 
 - `./gradlew bootRun`
 
+
+# Debug
+
+_Intellij IDEA_:
+
+1. Setup
+
+> Run \> Edit Configurations \> Add New Configuration \> Remote
+
+2. Usage
+
+> Run \> Debug \> [Remote Debugger]
