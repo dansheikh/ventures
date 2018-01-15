@@ -45,3 +45,7 @@ dependencies {
 bootRun {
     jvmArgs = ['-Xdebug', '-Xrunjdwp:server=y,transport=dt_socket,port=5005,suspend=n']
 }
+
+bootRepackage {
+	mainClass = 'com.bcg.dv.BootplateApplication'
+}
