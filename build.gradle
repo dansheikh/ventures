@@ -31,10 +31,12 @@ ext {
 dependencies {
     compile("org.codehaus.groovy:groovy:${groovyVersion}")
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
+	compile('org.springframework.boot:spring-boot-starter-jetty')
+	compile('org.springframework.boot:spring-boot-starter-security')
 	compile('org.springframework.boot:spring-boot-starter-web') {
 		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
 	}
-    compile('org.springframework.boot:spring-boot-starter-jetty')
+	compile('org.springframework.security.extensions:spring-security-saml2-core')
 	runtime('com.h2database:h2')
 	runtime('org.springframework.boot:spring-boot-devtools')
 	testCompile('org.springframework.boot:spring-boot-starter-test')

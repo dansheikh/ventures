@@ -7,6 +7,18 @@ init-scripts:
   - schema.sql
   - data.sql
 
+security:
+  saml2:
+    metadata-url:
+
+server:
+  port: 8443
+  ssl:
+    enabled: true
+    key-alias:
+    key-store:
+    key-store-password:
+
 spring:
   h2:
     console:
