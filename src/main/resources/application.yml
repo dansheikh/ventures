@@ -1,8 +1,7 @@
+---
 hibernate:
   dialect: org.hibernate.dialect.H2Dialect
   show_sql: true
-
----
 
 init-db: true
 init-scripts:
@@ -10,6 +9,12 @@ init-scripts:
   - data.sql
 
 spring:
+  datasource:
+    url: jdbc:h2:mem:esi;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    platform: h2
+    username: sysadmin
+    password:
+    driver-class-name: org.h2.Driver
   h2:
     console:
       enabled: true
