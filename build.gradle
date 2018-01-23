@@ -43,6 +43,8 @@ dependencies {
 }
 
 bootRun {
+	def profiles = 'test'
+	args = ["spring.profiles.active=${profiles}"]
     jvmArgs = ['-Xdebug', '-Xrunjdwp:server=y,transport=dt_socket,address=5005,suspend=n']
 }
 

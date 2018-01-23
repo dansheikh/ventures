@@ -2,6 +2,8 @@ hibernate:
   dialect: org.hibernate.dialect.H2Dialect
   show_sql: true
 
+---
+
 init-db: true
 init-scripts:
   - schema.sql
@@ -17,3 +19,4 @@ spring:
       ddl-auto: false
       format-sql: true
     show-sql: true
+  profiles: test
