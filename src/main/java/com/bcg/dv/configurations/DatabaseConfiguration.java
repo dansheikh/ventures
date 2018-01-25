@@ -31,7 +31,7 @@ public class DatabaseConfiguration {
 	@Value("${hibernate.show_sql}")
 	private String hibernateShowSql;
 	
-	@Bean
+	@Bean(destroyMethod = "shutdown")
 	@Profile("test")
 	public DataSource dataSource() {
 		return new EmbeddedDatabaseBuilder()
