@@ -3,6 +3,7 @@ package com.bcg.dv.configurations;
 import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,9 +17,14 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
-@EnableJpaRepositories(basePackages = {"com.bcg.dv.repositories"})
+@EnableJpaRepositories(basePackages = {"com.bcg.dv.repositories"},
+    entityManagerFactoryRef = "devEntityManagerFactory",
+    transactionManagerRef = "devTransactionManager")
 @EnableTransactionManagement
-public class DatabaseConfiguration {
+@Profile("dev")
+public class DevDbConfig {
+
+  final String ENCODING = "UTF-8";
 
   @Value("${hibernate.dialect}")
   private String hibernateDialect;
@@ -29,16 +35,15 @@ public class DatabaseConfiguration {
   @Value("${hibernate.show_sql}")
   private String hibernateShowSql;
 
-  @Bean(destroyMethod = "shutdown")
-  @Profile("test")
+  @Bean(name = "devDataSource", destroyMethod = "shutdown")
   public DataSource dataSource() {
-    return new EmbeddedDatabaseBuilder().setName("esi").setType(EmbeddedDatabaseType.H2)
-        .setScriptEncoding("UTF-8").ignoreFailedDrops(true).addDefaultScripts().build();
+    return new EmbeddedDatabaseBuilder().setName("esi-dev").setType(EmbeddedDatabaseType.H2)
+        .setScriptEncoding(ENCODING).ignoreFailedDrops(true).addDefaultScripts().build();
   }
 
-  @Bean
-  @Profile("test")
-  public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
+  @Bean(name = "devEntityManagerFactory")
+  public LocalContainerEntityManagerFactoryBean entityManagerFactory(
+      @Qualifier("devDataSource") DataSource dataSource) {
     final HibernateJpaVendorAdapter jpaVendorAdapter = new HibernateJpaVendorAdapter();
     final LocalContainerEntityManagerFactoryBean factory =
         new LocalContainerEntityManagerFactoryBean();
@@ -50,7 +55,7 @@ public class DatabaseConfiguration {
 
     jpaVendorAdapter.setGenerateDdl(false);
 
-    factory.setDataSource(dataSource());
+    factory.setDataSource(dataSource);
     factory.setJpaVendorAdapter(jpaVendorAdapter);
     factory.setJpaProperties(jpaVendorProperties);
     factory.setPackagesToScan("com.bcg.dv.entities");
@@ -59,9 +64,9 @@ public class DatabaseConfiguration {
     return factory;
   }
 
-  @Bean
-  @Profile("test")
-  public JpaTransactionManager transactionManager(final EntityManagerFactory entityManagerFactory) {
+  @Bean(name = "devTransactionManager")
+  public JpaTransactionManager transactionManager(
+      @Qualifier("devEntityManagerFactory") final EntityManagerFactory entityManagerFactory) {
     final JpaTransactionManager transactionManager = new JpaTransactionManager();
     transactionManager.setEntityManagerFactory(entityManagerFactory);
     return transactionManager;
