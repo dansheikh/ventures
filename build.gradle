@@ -42,12 +42,42 @@ dependencies {
     testCompile('org.spockframework:spock-spring')
 }
 
+task bootRunDev(type: org.springframework.boot.gradle.run.BootRunTask) {
+	group 'Application'
+	description 'Runs the project with development profile.'
+
+	doFirst() {
+		main = project.mainClassName
+		classpath = sourceSets.main.runtimeClasspath
+		args = ['--spring.profiles.active=dev']
+		jvmArgs = ['-Xdebug', '-Xrunjdwp:server=y,transport=dt_socket,address=5005,suspend=n']
+	}
+}
+
+task bootRunTest(type: org.springframework.boot.gradle.run.BootRunTask) {
+	group 'Application'
+	description 'Runs the project with test profile.'
+
+	doFirst() {
+		main = project.mainClassName
+		classpath = sourceSets.main.runtimeClasspath
+		args = ['--spring.profiles.active=test']
+	}
+}
+
+task bootRunPro(type: org.springframework.boot.gradle.run.BootRunTask) {
+	group 'Application'
+	description 'Runs the project with production profile.'
+
+	doFirst() {
+		main = project.mainClassName
+		classpath = sourceSets.main.runtimeClasspath
+		args = ['--spring.profiles.active=pro']
+	}
+}
+
 bootRun {
-	def opts = ['development', 'test', 'production']
-	def profiles;
-	profiles = profiles && opts.contains(profiles) ?: 'test'
-	args = ["--spring.profiles.active=${profiles}"]
-    jvmArgs = ['-Xdebug', '-Xrunjdwp:server=y,transport=dt_socket,address=5005,suspend=n']
+	args = ["--spring.profiles.active=pro"]
 }
 
 bootRepackage {

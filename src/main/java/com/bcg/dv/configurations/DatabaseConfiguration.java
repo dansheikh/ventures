@@ -41,8 +41,6 @@ public class DatabaseConfiguration {
 				.ignoreFailedDrops(true)
 				.addDefaultScripts()
 				.build();
-
-		// return DataSourceBuilder.create().build();
 	}
 	
 	@Bean
