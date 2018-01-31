@@ -27,11 +27,14 @@ repositories {
 ext {
     groovyVersion = '2.4.13'
     retrofitVersion = '2.3.0'
+    springfoxVersion = '2.8.0'
 }
 
 dependencies {
 	compile("com.squareup.retrofit2:retrofit:${retrofitVersion}")
 	compile("com.squareup.retrofit2:converter-jackson:${retrofitVersion}")
+	compile("io.springfox:springfox-swagger2:${springfoxVersion}")
+	compile("io.springfox:springfox-swagger-ui:${springfoxVersion}")
     compile("org.codehaus.groovy:groovy:${groovyVersion}")
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
 	compile('org.springframework.boot:spring-boot-starter-web') {
