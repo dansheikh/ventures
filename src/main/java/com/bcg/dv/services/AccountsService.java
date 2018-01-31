@@ -1,6 +1,6 @@
 package com.bcg.dv.services;
 
-import com.bcg.dv.api.json.Transfer;
+import com.bcg.dv.api.bindings.Transfer;
 import com.bcg.dv.entities.Account;
 import com.bcg.dv.repositories.AccountsRepository;
 import java.math.BigDecimal;

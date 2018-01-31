@@ -1,6 +1,6 @@
 package com.bcg.dv.entities;
 
-import com.bcg.dv.api.json.Views;
+import com.bcg.dv.api.bindings.Views;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import java.math.BigDecimal;
