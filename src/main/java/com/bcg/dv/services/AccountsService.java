@@ -1,14 +1,14 @@
 package com.bcg.dv.services;
 
-import com.bcg.dv.api.bindings.Transfer;
-import com.bcg.dv.entities.Account;
-import com.bcg.dv.repositories.AccountsRepository;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import javax.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.bcg.dv.api.bindings.Transfer;
+import com.bcg.dv.entities.Account;
+import com.bcg.dv.repositories.AccountsRepository;
 
 @Service
 @Transactional

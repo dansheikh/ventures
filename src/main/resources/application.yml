@@ -32,6 +32,9 @@ spring:
   profiles: dev
 
 ---
+api:
+  iex:
+    url: https://api.iextrading.com/1.0/
 
 hibernate:
   dialect: org.hibernate.dialect.H2Dialect
@@ -63,6 +66,9 @@ spring:
   profiles: test
 
 ---
+api:
+  iex:
+    url: https://api.iextrading.com/1.0/
 
 hibernate:
   dialect: org.hibernate.dialect.H2Dialect

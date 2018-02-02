@@ -48,6 +48,22 @@ dependencies {
     testCompile('org.spockframework:spock-spring')
 }
 
+javadoc {
+	source sourceSets.main.allJava
+
+	title = 'Micro-Service Template Documentation'
+	options.linkSource = true
+	options.links = ['https://docs.oracle.com/javase/8/docs/api/', 'https://docs.spring.io/spring-boot/docs/current/api/']
+	options.footer = "Generated on ${new Date().format('dd MMM yyyy')}"
+	options.header = "Documentation for version ${project.version}"
+
+	failOnError false
+}
+
+test {
+	systemProperty 'spring.profiles.active', 'test'
+}
+
 task bootRunDev(type: org.springframework.boot.gradle.run.BootRunTask) {
 	group 'Application'
 	description 'Runs the project with development profile.'
