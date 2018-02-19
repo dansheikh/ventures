@@ -15,7 +15,11 @@ init-scripts:
 
 security:
   saml2:
-    metadata-url:
+    entity-id: com:bcg:dv:sp
+    password: ventures
+    timeout: 5000
+    username: bcgdv
+    okta-metadata-url:
 
 server:
   port: 8443

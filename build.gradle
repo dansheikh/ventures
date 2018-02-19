@@ -28,6 +28,7 @@ ext {
     groovyVersion = '2.4.13'
     retrofitVersion = '2.3.0'
     springfoxVersion = '2.8.0'
+	springSecurityVersion = '1.0.3.RELEASE'
 }
 
 dependencies {
@@ -42,7 +43,7 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web') {
 		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
 	}
-	compile('org.springframework.security.extensions:spring-security-saml2-core')
+	compile("org.springframework.security.extensions:spring-security-saml2-core:${springSecurityVersion}")
 	runtime('com.h2database:h2')
 	runtime('org.springframework.boot:spring-boot-devtools')
 	testCompile('org.springframework.boot:spring-boot-starter-test')
