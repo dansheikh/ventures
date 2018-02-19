@@ -1,7 +1,7 @@
 package com.bcg.dv.api.controllers;
 
-import com.bcg.dv.api.json.Transfer;
-import com.bcg.dv.api.json.Views;
+import com.bcg.dv.api.bindings.Transfer;
+import com.bcg.dv.api.bindings.Views;
 import com.bcg.dv.entities.Account;
 import com.bcg.dv.services.AccountsService;
 import com.bcg.dv.services.Status;

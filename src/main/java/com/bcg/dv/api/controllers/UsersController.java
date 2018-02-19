@@ -1,6 +1,6 @@
 package com.bcg.dv.api.controllers;
 
-import com.bcg.dv.api.json.Views;
+import com.bcg.dv.api.bindings.Views;
 import com.bcg.dv.entities.User;
 import com.bcg.dv.services.UsersService;
 import com.fasterxml.jackson.annotation.JsonView;

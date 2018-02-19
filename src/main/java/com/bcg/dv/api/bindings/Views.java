@@ -1,4 +1,4 @@
-package com.bcg.dv.api.json;
+package com.bcg.dv.api.bindings;
 
 public class Views {
 

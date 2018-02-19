@@ -1,12 +1,12 @@
 package com.bcg.dv.services;
 
-import com.bcg.dv.entities.User;
-import com.bcg.dv.repositories.UsersRepository;
 import java.util.List;
-import javax.transaction.Transactional;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.bcg.dv.entities.User;
+import com.bcg.dv.repositories.UsersRepository;
 
 @Service
 @Transactional
