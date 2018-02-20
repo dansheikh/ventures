@@ -44,6 +44,8 @@ dependencies {
 		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
 	}
 	compile("org.springframework.security.extensions:spring-security-saml2-core:${springSecurityVersion}")
+    compile('org.springframework.boot:spring-boot-starter-data-redis')
+	compile('org.springframework.session:spring-session-data-redis')
 	runtime('com.h2database:h2')
 	runtime('org.springframework.boot:spring-boot-devtools')
 	testCompile('org.springframework.boot:spring-boot-starter-test')

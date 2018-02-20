@@ -56,11 +56,16 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.savedrequest.NullRequestCache;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
+import org.springframework.session.web.http.HeaderHttpSessionStrategy;
+import org.springframework.session.web.http.HttpSessionStrategy;
 
 @Configuration
 @EnableGlobalMethodSecurity(securedEnabled = true)
 @EnableWebSecurity
+@EnableRedisHttpSession
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
   @Value("${security.saml2.oktaMetadataUrl}")
@@ -314,6 +319,11 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     return new SAMLBootstrap();
   }
 
+  @Bean
+  public HttpSessionStrategy httpSessionStrategy() {
+    return new HeaderHttpSessionStrategy();
+  }
+
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http.addFilterBefore(
@@ -324,6 +334,6 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     http.httpBasic().authenticationEntryPoint(samlEntryPoint(defaultWebSSOProfileOptions()));
     http.csrf().disable();
 
-    http.authorizeRequests().antMatchers("/saml/**").permitAll().anyRequest().authenticated();
+    http.authorizeRequests().antMatchers("/saml/**").permitAll().anyRequest().authenticated().and().requestCache().requestCache(new NullRequestCache());
   }
 }
