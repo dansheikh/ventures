@@ -68,35 +68,29 @@ import org.springframework.session.web.http.HttpSessionStrategy;
 @EnableRedisHttpSession
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-  @Value("${security.saml2.oktaMetadataUrl}")
-  private String oktaMetadataUrl;
-
-  @Value("${security.saml2.timeout}")
-  private Integer timeout;
-
-  @Value("${security.saml2.password}")
-  private String password;
-
-  @Value("${security.saml2.username}")
-  private String username;
-
   @Value("${security.saml2.entity-id}")
   private String entityId;
 
   @Value("${security.saml2.metadata-url}")
   private String metadataUrl;
 
+  @Value("${security.saml2.timeout}")
+  private Integer timeout;
+
   @Value("${server.port}")
   private String port;
 
-  @Value("${server.ssl.key-alias}")
-  private String keyAlias;
-
   @Value("${server.ssl.key-store}")
-  private String keyStorePath;
+  private String keyStore;
+
+  @Value("${server.ssl.key-store-alias}")
+  private String keyStoreAlias;
 
   @Value("${server.ssl.key-store-password}")
   private String keyStorePassword;
+
+  @Value("${server.ssl.private-key-password")
+  private String privateKeyPassword;
 
   private Timer backgroundTaskTimer;
   private MultiThreadedHttpConnectionManager multiThreadedHttpConnectionManager;
@@ -133,18 +127,18 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     return new HttpClient(multiThreadedHttpConnectionManager);
   }
 
-  @Bean(name = "oktaExtendedMetadataProvider")
-  public ExtendedMetadataDelegate oktaExtendedMetadataProvider(
+  @Bean(name = "extendedMetadataProvider")
+  public ExtendedMetadataDelegate extendedMetadataProvider(
       @Qualifier("httpClient") HttpClient httpClient,
       @Qualifier("parserPool") StaticBasicParserPool parserPool,
       @Qualifier("extendedMetadata") ExtendedMetadata extendedMetadata)
       throws MetadataProviderException {
     HTTPMetadataProvider httpMetadataProvider = new HTTPMetadataProvider(backgroundTaskTimer,
-        httpClient, oktaMetadataUrl);
+        httpClient, metadataUrl);
     httpMetadataProvider.setParserPool(parserPool);
     ExtendedMetadataDelegate extendedMetadataDelegate = new ExtendedMetadataDelegate(
         httpMetadataProvider, extendedMetadata);
-    extendedMetadataDelegate.setMetadataTrustCheck(true);
+    extendedMetadataDelegate.setMetadataTrustCheck(false);
     extendedMetadataDelegate.setMetadataRequireSignature(false);
     backgroundTaskTimer.purge();
 
@@ -153,7 +147,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
   @Bean(name = "metadata")
   public CachingMetadataManager metadata(
-      @Qualifier("oktaExtendedMetadataProvider") ExtendedMetadataDelegate extendedMetadataDelegate)
+      @Qualifier("extendedMetadataProvider") ExtendedMetadataDelegate extendedMetadataDelegate)
       throws MetadataProviderException {
     List<MetadataProvider> providers = new ArrayList<>();
     providers.add(extendedMetadataDelegate);
@@ -163,11 +157,11 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   @Bean(name = "keyManager")
   public KeyManager keyManager() {
     DefaultResourceLoader loader = new DefaultResourceLoader();
-    Resource keystoreResource = loader.getResource("classpath:/saml/samlKeystore.jks");
-    Map<String, String> userPasswords = new HashMap<String, String>();
-    userPasswords.put(username, password);
+    Resource keystoreResource = loader.getResource(keyStore);
+    Map<String, String> passwords = new HashMap<String, String>();
+    passwords.put(keyStoreAlias, privateKeyPassword);
 
-    return new JKSKeyManager(keystoreResource, password, userPasswords, username);
+    return new JKSKeyManager(keystoreResource, keyStorePassword, passwords, keyStoreAlias);
   }
 
   @Bean(name = "metadataGenerator")
@@ -283,7 +277,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         samlLogoutFilter(successLogoutHandler(), logoutHandler())));
     chain.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/metadata/**"),
         metadataDisplayFilter()));
-    chain.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/SSO/**"),
+    chain.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/sso/**"),
         samlWebSSOProcessingFilter()));
     chain.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/singleLogout/**"),
         samlLogoutProcessingFilter()));
@@ -334,6 +328,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     http.httpBasic().authenticationEntryPoint(samlEntryPoint(defaultWebSSOProfileOptions()));
     http.csrf().disable();
 
-    http.authorizeRequests().antMatchers("/saml/**").permitAll().anyRequest().authenticated().and().requestCache().requestCache(new NullRequestCache());
+    http.authorizeRequests().antMatchers("/saml/**").permitAll().anyRequest().authenticated().and()
+        .requestCache().requestCache(new NullRequestCache());
   }
 }

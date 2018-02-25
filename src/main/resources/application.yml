@@ -4,19 +4,17 @@ api:
 
 security:
   saml2:
-    entity-id: com:bcg:dv:sp
-    password: ventures
+    entity-id: com:capgroup:esi:sp
     timeout: 5000
-    username: bcgdv
-    okta-metadata-url:
-
+    metadata-url: https://dev-571172.oktapreview.com/app/exke4ulw9xcCvZWGK0h7/sso/saml/metadata
 server:
   port: 8443
   ssl:
     enabled: true
-    key-alias:
-    key-store:
-    key-store-password:
+    key-store: classpath:saml/capgroup.jks
+    key-store-alias: capgroup
+    key-store-password: capgroup
+    private-key-password: esi4cg
 
 spring:
   redis:
