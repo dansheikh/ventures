@@ -14,7 +14,7 @@ server:
     key-store: classpath:saml/capgroup.jks
     key-store-alias: capgroup
     key-store-password: capgroup
-    private-key-password: esi4cg
+    key-password: esi4cg
 
 spring:
   redis:

@@ -101,8 +101,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   @Value("${server.ssl.key-store-password}")
   private String keyStorePassword;
 
-  @Value("${server.ssl.private-key-password")
-  private String privateKeyPassword;
+  @Value("${server.ssl.key-password")
+  private String keyPassword;
 
   private Timer backgroundTaskTimer;
   private MultiThreadedHttpConnectionManager multiThreadedHttpConnectionManager;
@@ -204,7 +204,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     DefaultResourceLoader loader = new DefaultResourceLoader();
     Resource keystoreResource = loader.getResource(keyStore);
     Map<String, String> passwords = new HashMap<String, String>();
-    passwords.put(keyStoreAlias, privateKeyPassword);
+    passwords.put(keyStoreAlias, keyPassword);
 
     return new JKSKeyManager(keystoreResource, keyStorePassword, passwords, keyStoreAlias);
   }
@@ -246,7 +246,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     return new SAMLDefaultLogger();
   }
 
-  @Bean(name = "webSSOProfile")
+  @Bean(name = "webSSOprofile")
   public WebSSOProfile webSSOProfile() {
     return new WebSSOProfileImpl();
   }
@@ -264,7 +264,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   @Bean(name = "samlEntryPoint")
   public SAMLEntryPoint samlEntryPoint(
       @Qualifier("defaultWebSSOProfileOptions") WebSSOProfileOptions defaultWebSSOProfileOptions,
-      @Qualifier("webSSOProfile") WebSSOProfile webSSOProfile) {
+      @Qualifier("webSSOprofile") WebSSOProfile webSSOProfile) {
     SAMLEntryPoint samlEntryPoint = new SAMLEntryPoint();
     samlEntryPoint.setWebSSOprofile(webSSOProfile);
     samlEntryPoint.setDefaultProfileOptions(defaultWebSSOProfileOptions);
