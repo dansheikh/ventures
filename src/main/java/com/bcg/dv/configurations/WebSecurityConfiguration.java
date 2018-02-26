@@ -10,12 +10,15 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.opensaml.saml2.metadata.provider.HTTPMetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProvider;
 import org.opensaml.saml2.metadata.provider.MetadataProviderException;
 import org.opensaml.xml.parse.StaticBasicParserPool;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.MethodInvokingFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -30,8 +33,11 @@ import org.springframework.security.saml.SAMLEntryPoint;
 import org.springframework.security.saml.SAMLLogoutFilter;
 import org.springframework.security.saml.SAMLLogoutProcessingFilter;
 import org.springframework.security.saml.SAMLProcessingFilter;
+import org.springframework.security.saml.context.SAMLContextProvider;
+import org.springframework.security.saml.context.SAMLContextProviderImpl;
 import org.springframework.security.saml.key.JKSKeyManager;
 import org.springframework.security.saml.key.KeyManager;
+import org.springframework.security.saml.log.SAMLDefaultLogger;
 import org.springframework.security.saml.metadata.CachingMetadataManager;
 import org.springframework.security.saml.metadata.ExtendedMetadata;
 import org.springframework.security.saml.metadata.ExtendedMetadataDelegate;
@@ -41,6 +47,10 @@ import org.springframework.security.saml.metadata.MetadataGeneratorFilter;
 import org.springframework.security.saml.processor.HTTPRedirectDeflateBinding;
 import org.springframework.security.saml.processor.SAMLBinding;
 import org.springframework.security.saml.processor.SAMLProcessorImpl;
+import org.springframework.security.saml.trust.httpclient.TLSProtocolConfigurer;
+import org.springframework.security.saml.trust.httpclient.TLSProtocolSocketFactory;
+import org.springframework.security.saml.websso.SingleLogoutProfile;
+import org.springframework.security.saml.websso.SingleLogoutProfileImpl;
 import org.springframework.security.saml.websso.WebSSOProfile;
 import org.springframework.security.saml.websso.WebSSOProfileConsumer;
 import org.springframework.security.saml.websso.WebSSOProfileConsumerImpl;
@@ -67,6 +77,8 @@ import org.springframework.session.web.http.HttpSessionStrategy;
 @EnableWebSecurity
 @EnableRedisHttpSession
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+
+  private final Integer PROTOCOL_PORT = 443;
 
   @Value("${security.saml2.entity-id}")
   private String entityId;
@@ -106,6 +118,39 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     backgroundTaskTimer.purge();
     backgroundTaskTimer.cancel();
     multiThreadedHttpConnectionManager.shutdown();
+  }
+
+/*
+  @Bean(name = "tlsProtocolConfigurer")
+  public TLSProtocolConfigurer tlsProtocolConfigurer() {
+    return new TLSProtocolConfigurer();
+  }
+
+  @Bean(name = "protocolSocketFactory")
+  public ProtocolSocketFactory protocolSocketFactory() {
+    return new TLSProtocolSocketFactory(keyManager(), null, "default");
+  }
+
+  @Bean(name = "socketFactoryProtocol")
+  public Protocol socketFactoryProtocol() {
+    return new Protocol("https", protocolSocketFactory(), PROTOCOL_PORT);
+  }
+
+  @Bean(name = "socketFactoryInitialization")
+  public MethodInvokingFactoryBean socketFactoryInitialization() {
+    MethodInvokingFactoryBean methodInvokingFactoryBean = new MethodInvokingFactoryBean();
+    methodInvokingFactoryBean.setTargetClass(Protocol.class);
+    methodInvokingFactoryBean.setTargetMethod("registerProtocol");
+    Object[] args = {"https", socketFactoryProtocol()};
+    methodInvokingFactoryBean.setArguments(args);
+
+    return methodInvokingFactoryBean;
+  }
+*/
+
+  @Bean(name = "samlBootstrap")
+  public static SAMLBootstrap samlBootstrap() {
+    return new SAMLBootstrap();
   }
 
   @Bean(name = "parserPool", initMethod = "initialize")
@@ -191,10 +236,37 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     return webSSOProfileOptions;
   }
 
+  @Bean(name = "samlContextProvider")
+  public SAMLContextProvider samlContextProvider() {
+    return new SAMLContextProviderImpl();
+  }
+
+  @Bean(name = "samlDefaultLogger")
+  public SAMLDefaultLogger samlDefaultLogger() {
+    return new SAMLDefaultLogger();
+  }
+
+  @Bean(name = "webSSOProfile")
+  public WebSSOProfile webSSOProfile() {
+    return new WebSSOProfileImpl();
+  }
+
+  @Bean(name = "webSSOProfileConsumer")
+  public WebSSOProfileConsumer webSSOProfileConsumer() {
+    return new WebSSOProfileConsumerImpl();
+  }
+
+  @Bean(name = "singleLogoutProfile")
+  public SingleLogoutProfile singleLogoutProfile() {
+    return new SingleLogoutProfileImpl();
+  }
+
   @Bean(name = "samlEntryPoint")
   public SAMLEntryPoint samlEntryPoint(
-      @Qualifier("defaultWebSSOProfileOptions") WebSSOProfileOptions defaultWebSSOProfileOptions) {
+      @Qualifier("defaultWebSSOProfileOptions") WebSSOProfileOptions defaultWebSSOProfileOptions,
+      @Qualifier("webSSOProfile") WebSSOProfile webSSOProfile) {
     SAMLEntryPoint samlEntryPoint = new SAMLEntryPoint();
+    samlEntryPoint.setWebSSOprofile(webSSOProfile);
     samlEntryPoint.setDefaultProfileOptions(defaultWebSSOProfileOptions);
 
     return samlEntryPoint;
@@ -272,7 +344,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
   public FilterChainProxy samlFilter() throws Exception {
     List<SecurityFilterChain> chain = new ArrayList<>();
     chain.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/login/**"),
-        samlEntryPoint(defaultWebSSOProfileOptions())));
+        samlEntryPoint(defaultWebSSOProfileOptions(), webSSOProfile())));
     chain.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/logout/**"),
         samlLogoutFilter(successLogoutHandler(), logoutHandler())));
     chain.add(new DefaultSecurityFilterChain(new AntPathRequestMatcher("/saml/metadata/**"),
@@ -298,21 +370,6 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
     return new SAMLProcessorImpl(bindings);
   }
 
-  @Bean(name = "webSSOProfileConsumer")
-  public WebSSOProfileConsumer webSSOProfileConsumer() {
-    return new WebSSOProfileConsumerImpl();
-  }
-
-  @Bean(name = "webSSOProfile")
-  public WebSSOProfile webSSOProfile() {
-    return new WebSSOProfileImpl();
-  }
-
-  @Bean
-  public SAMLBootstrap samlBootstrap() {
-    return new SAMLBootstrap();
-  }
-
   @Bean
   public HttpSessionStrategy httpSessionStrategy() {
     return new HeaderHttpSessionStrategy();
@@ -325,7 +382,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
         ChannelProcessingFilter.class);
     http.addFilterAfter(samlFilter(), BasicAuthenticationFilter.class);
 
-    http.httpBasic().authenticationEntryPoint(samlEntryPoint(defaultWebSSOProfileOptions()));
+    http.httpBasic()
+        .authenticationEntryPoint(samlEntryPoint(defaultWebSSOProfileOptions(), webSSOProfile()));
     http.csrf().disable();
 
     http.authorizeRequests().antMatchers("/saml/**").permitAll().anyRequest().authenticated().and()
